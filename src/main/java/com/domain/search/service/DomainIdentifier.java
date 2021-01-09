@@ -24,7 +24,10 @@ public class DomainIdentifier {
 
 	private ObjectMapper objectMapper = new ObjectMapper();
 	private Gson gson = new Gson();
-	
+
+	private int totalCount = 0;
+	private int availableCount = 0;
+
 	@Autowired
 	private GodaddyApiServiceCall apiService;
 
@@ -32,14 +35,9 @@ public class DomainIdentifier {
 	public String getDomains() throws IOException, InterruptedException {
 		// available domains map
 		Map<String, String> availableDomainsMap = new HashMap<>();
-		// available count map
-		int totalCount = 0;
-		int availableCount = 0;
-		
 		try {
-			defaultTwoCharSearchLogic(availableDomainsMap, objectMapper, gson, totalCount,
-					availableCount);
-			
+			defaultTwoCharSearchLogic(availableDomainsMap, false, null);
+
 			return objectMapper.writeValueAsString(availableDomainsMap);
 
 		} catch (IOException e) {
@@ -49,39 +47,54 @@ public class DomainIdentifier {
 		return objectMapper.writeValueAsString(availableDomainsMap);
 	}
 
-	private Map<String, String> defaultTwoCharSearchLogic(Map<String, String> availableDomainsMap, ObjectMapper objectMapper,
-			Gson gson, int totalCount, int availableCount) throws InterruptedException, JsonProcessingException {
+	@GetMapping("/get")
+	public String getDomain(String d) throws IOException, InterruptedException {
+		// available domains map
+		Map<String, String> availableDomainsMap = new HashMap<>();
+		defaultTwoCharSearchLogic(availableDomainsMap, true, d);
+		return objectMapper.writeValueAsString(availableDomainsMap);
+	}
 
-		// generates two characters string
-		for (char alphabet = 'A'; alphabet <= 'Z'; alphabet++) {
-			for (char alphabet1 = 'A'; alphabet1 <= 'Z'; alphabet1++) {
-				String domain = new StringBuilder().append(alphabet).append(alphabet1).toString() + ".com";
+	private Map<String, String> defaultTwoCharSearchLogic(Map<String, String> availableDomainsMap, Boolean flag,
+			String domainParam) throws InterruptedException, JsonProcessingException {
+		GetDomainStatusResponse goDaddyResponse = null;
+		if (flag) {
+			goDaddyResponse = apiService.getSingleDomainStatus(domainParam);
+			// get available domains and count
+			getAvailableDomains(availableDomainsMap, goDaddyResponse);
+			totalCount++;
+		} else {
+			// generates two characters string
+			for (char alphabet = 'A'; alphabet <= 'Z'; alphabet++) {
+				for (char alphabet1 = 'A'; alphabet1 <= 'Z'; alphabet1++) {
+					String domain = new StringBuilder().append(alphabet).append(alphabet1).toString() + ".com";
 
-				GetDomainStatusResponse goDaddyResponse = null;
-				try {
-					goDaddyResponse = apiService.getSingleDomainStatus(domain);
-				} catch (Exception ex) {
-					// fetching error message from go daddy
-					String message = ex.getMessage();
-					// Cut off the string to get JSON string
-					String errorResponsejson = message.substring(message.indexOf(':') + 1);
-					// converting it to array to fetch the first value
-					RetryResponse[] fromJson = gson.fromJson(errorResponsejson, RetryResponse[].class);
-					// fetching first value to get retry after seconds
-					RetryResponse convertedObject = gson.fromJson(gson.toJson(fromJson[0]), RetryResponse.class);
-					// calculating the time to wait before next call
-					Integer timeToWait = convertedObject.getRetryAfterSec() != null ? convertedObject.getRetryAfterSec()
-							: 30;
-					// sleep as go daddy has 60 calls per minutes restriction
-					Thread.sleep(timeToWait * 1000);
-					// next call
-					goDaddyResponse = apiService.getSingleDomainStatus(domain);
+					try {
+						goDaddyResponse = apiService.getSingleDomainStatus(domain);
+					} catch (Exception ex) {
+						// fetching error message from go daddy
+						String message = ex.getMessage();
+						// Cut off the string to get JSON string
+						String errorResponsejson = message.substring(message.indexOf(':') + 1);
+						// converting it to array to fetch the first value
+						RetryResponse[] fromJson = gson.fromJson(errorResponsejson, RetryResponse[].class);
+						// fetching first value to get retry after seconds
+						RetryResponse convertedObject = gson.fromJson(gson.toJson(fromJson[0]), RetryResponse.class);
+						// calculating the time to wait before next call
+						Integer timeToWait = convertedObject.getRetryAfterSec() != null
+								? convertedObject.getRetryAfterSec()
+								: 30;
+						// sleep as go daddy has 60 calls per minutes restriction
+						Thread.sleep(timeToWait * 1000);
+						// next call
+						goDaddyResponse = apiService.getSingleDomainStatus(domain);
+					}
+
+					// get available domains and count
+					getAvailableDomains(availableDomainsMap, goDaddyResponse);
+
+					totalCount++;
 				}
-
-				// get available domains and count
-				getAvailableDomains(availableDomainsMap, availableCount, goDaddyResponse);
-
-				totalCount++;
 			}
 		}
 		availableDomainsMap.put("totalCount", String.valueOf(totalCount));
@@ -90,11 +103,10 @@ public class DomainIdentifier {
 		return availableDomainsMap;
 	}
 
-	private void getAvailableDomains(Map<String, String> availableDomainsMap, int availableCount,
-			GetDomainStatusResponse goDaddyResponse) {
+	private void getAvailableDomains(Map<String, String> availableDomainsMap, GetDomainStatusResponse goDaddyResponse) {
 		if (null != goDaddyResponse && goDaddyResponse.getAvailable()) {
-			availableDomainsMap.put(String.valueOf(availableCount), goDaddyResponse.getDomain());
 			availableCount++;
+			availableDomainsMap.put(String.valueOf(availableCount), goDaddyResponse.getDomain());
 		}
 	}
 }

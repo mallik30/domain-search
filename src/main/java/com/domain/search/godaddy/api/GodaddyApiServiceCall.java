@@ -15,7 +15,7 @@ public class GodaddyApiServiceCall {
 
 	private RestTemplate restTemplate = new RestTemplate();
 
-	@GetMapping("/domains/available")
+	@GetMapping("/direct/single/domain")
 	public GetDomainStatusResponse getSingleDomainStatus(String domain) {
 		String url = "https://api.ote-godaddy.com/v1/domains/available?domain=" + domain;
 		HttpHeaders headers = new HttpHeaders();
