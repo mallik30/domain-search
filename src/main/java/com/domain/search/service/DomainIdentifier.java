@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.domain.search.godaddy.api.GodaddyApiServiceCall;
-import com.domain.search.model.GetDomainStatusResponse;
+import com.domain.search.model.DomainStatusResponse;
 import com.domain.search.model.RetryResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -57,7 +57,7 @@ public class DomainIdentifier {
 
 	private Map<String, String> defaultTwoCharSearchLogic(Map<String, String> availableDomainsMap, Boolean flag,
 			String domainParam) throws InterruptedException, JsonProcessingException {
-		GetDomainStatusResponse goDaddyResponse = null;
+		DomainStatusResponse goDaddyResponse = null;
 		if (flag) {
 			goDaddyResponse = apiService.getSingleDomainStatus(domainParam);
 			// get available domains and count
@@ -103,7 +103,7 @@ public class DomainIdentifier {
 		return availableDomainsMap;
 	}
 
-	private void getAvailableDomains(Map<String, String> availableDomainsMap, GetDomainStatusResponse goDaddyResponse) {
+	private void getAvailableDomains(Map<String, String> availableDomainsMap, DomainStatusResponse goDaddyResponse) {
 		if (null != goDaddyResponse && goDaddyResponse.getAvailable()) {
 			availableCount++;
 			availableDomainsMap.put(String.valueOf(availableCount), goDaddyResponse.getDomain());

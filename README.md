@@ -2,6 +2,5 @@
 consumes godaddy api
 
 
-//TODO
-add bulk domain search
-add swagger
+Notes:
+please add your auth in application.properties and play around with code

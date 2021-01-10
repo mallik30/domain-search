@@ -1,6 +1,6 @@
 package com.domain.search.model;
 
-public class GetDomainStatusResponse {
+public class DomainStatusResponse {
 
 	private Boolean available;
 	private String currency;
