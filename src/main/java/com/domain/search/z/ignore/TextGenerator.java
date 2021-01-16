@@ -1,4 +1,4 @@
-package com.domain.search.service;
+package com.domain.search.z.ignore;
 
 import java.util.ArrayList;
 import java.util.List;

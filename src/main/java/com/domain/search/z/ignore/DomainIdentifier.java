@@ -1,4 +1,4 @@
-package com.domain.search.service;
+package com.domain.search.z.ignore;
 
 import java.io.IOException;
 import java.util.HashMap;
