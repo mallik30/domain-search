@@ -13,13 +13,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 
 import com.domain.search.model.DomainStatusResponse;
+import com.domain.search.model.DomainStatusResponseList;
 
 @RestController
 public class GodaddyApiServiceCall {
 
 	private RestTemplate restTemplate = new RestTemplate();
 	
-	@Value("${auth}")
+	@Value("${prodauth}")
 	private String auth;
 
 	@GetMapping("/direct/single/domain")
@@ -32,10 +33,11 @@ public class GodaddyApiServiceCall {
 	}
 
 	@PostMapping("/direct/post/domains")
-	public ResponseEntity<String> getMultiDomainAvailableStatus(@RequestBody String domains) {
-		String url = "https://api.ote-godaddy.com/v1/domains/available";
+	public ResponseEntity<DomainStatusResponseList> getMultiDomainAvailableStatus(@RequestBody String domains) {
+		String url = "https://api.godaddy.com/v1/domains/available";
 		HttpEntity<String> entity = new HttpEntity<>(domains, getHeaders());
-		return restTemplate.postForEntity(url, entity, String.class);
+		ResponseEntity<DomainStatusResponseList> postForEntity = restTemplate.postForEntity(url, entity, DomainStatusResponseList.class);
+		return postForEntity;
 	}
 
 	private HttpHeaders getHeaders() {
