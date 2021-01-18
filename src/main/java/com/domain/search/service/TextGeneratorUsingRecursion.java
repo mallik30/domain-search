@@ -56,14 +56,16 @@ public class TextGeneratorUsingRecursion {
 		List<String> generatedDomains = new ArrayList<>();
 
 		List<DomainStatusResponse> availableDomains = new ArrayList<>();
+		List<String> availableDomainsOnly = new ArrayList<>();
 		// generate domains
-		identifyDomains(charSet, "", charSet.length, domainLength, generatedDomains, 500, availableDomains);
+		identifyDomains(charSet, "", charSet.length, domainLength, generatedDomains, 500, availableDomains,
+				availableDomainsOnly);
 		return availableDomains;
 	}
 
 	public void identifyDomains(char[] charSet, String prefix, int charLength, int domainLength,
-			List<String> generatedDomains, int domainLimit, List<DomainStatusResponse> availableDomains)
-			throws InterruptedException {
+			List<String> generatedDomains, int domainLimit, List<DomainStatusResponse> availableDomains,
+			List<String> availableDomainsOnly) throws InterruptedException {
 
 		if (domainLength == 0) {
 			generatedDomains.add(prefix + ".com");
@@ -99,15 +101,16 @@ public class TextGeneratorUsingRecursion {
 				for (DomainStatusResponse dsp : multiDomainAvailableStatus.getBody().getDomains()) {
 					if (dsp.getAvailable()) {
 						availableDomains.add(dsp);
-						System.out.println("adding to availableDomains" + availableDomains);
+						availableDomainsOnly.add(dsp.getDomain());
 					}
 				}
+				System.out.println("Domains" + availableDomainsOnly);
 				// clear for fresh records
 				generatedDomains.clear();
 			}
 			String newPrefix = prefix + charSet[i];
 			identifyDomains(charSet, newPrefix, charLength, domainLength - 1, generatedDomains, domainLimit,
-					availableDomains);
+					availableDomains, availableDomainsOnly);
 		}
 	}
 
