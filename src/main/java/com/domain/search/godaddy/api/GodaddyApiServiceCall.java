@@ -19,7 +19,7 @@ import com.domain.search.model.DomainStatusResponseList;
 public class GodaddyApiServiceCall {
 
 	private RestTemplate restTemplate = new RestTemplate();
-	
+
 	@Value("${prodauth}")
 	private String auth;
 
@@ -36,7 +36,8 @@ public class GodaddyApiServiceCall {
 	public ResponseEntity<DomainStatusResponseList> getMultiDomainAvailableStatus(@RequestBody String domains) {
 		String url = "https://api.godaddy.com/v1/domains/available";
 		HttpEntity<String> entity = new HttpEntity<>(domains, getHeaders());
-		ResponseEntity<DomainStatusResponseList> postForEntity = restTemplate.postForEntity(url, entity, DomainStatusResponseList.class);
+		ResponseEntity<DomainStatusResponseList> postForEntity = restTemplate.postForEntity(url, entity,
+				DomainStatusResponseList.class);
 		return postForEntity;
 	}
 
@@ -46,5 +47,13 @@ public class GodaddyApiServiceCall {
 		headers.set("Content-Type", MediaType.APPLICATION_JSON_VALUE);
 		headers.set("Authorization", auth);
 		return headers;
+	}
+
+	@PostMapping("/direct/post/domains/test")
+	public ResponseEntity<String> getMultiDomainAvailableStatusTest(@RequestBody String domains) {
+		String url = "https://api.godaddy.com/v1/domains/available";
+		HttpEntity<String> entity = new HttpEntity<>(domains, getHeaders());
+		ResponseEntity<String> postForEntity = restTemplate.postForEntity(url, entity, String.class);
+		return postForEntity;
 	}
 }

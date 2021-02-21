@@ -6,6 +6,8 @@ import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
+import com.domain.search.z.ignore.TextGeneratorUsingRecursion;
+
 public class TestTextGeneratorUsingRecursion {
 
 	@Test
